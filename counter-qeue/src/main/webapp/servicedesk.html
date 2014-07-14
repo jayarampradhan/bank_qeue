@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Reception Help Desk</title>
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+    <link href="assets/lib/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <link href="assets/common/bank_que.css" rel="stylesheet">
+    <!--[if lt IE 9]>
+    <script src="assets/lib/html5shiv/dist/html5shiv.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+
+    <div class="container">
+      <div id="heading" class="masthead">
+        <div class="pull-right">
+          Welcome: <span class="text-info" data-bind="text: username"><em></em></span>&nbsp;
+          <button data-bind="click: $root.ticket().openCreateTicketDialog" class="btn">Create a ticket</button>
+        </div>
+        <h3 class="muted">Counter status</h3>
+      </div>
+      <!-- Counter Details -->
+      <div class="col-xs-6 col-md-6">
+	      <div id="main-content">
+	        <table class="table table-striped">
+	          <thead>
+	            <tr>
+	              <th class="number">Counter ID</th>
+	              <th class="text">Counter Type</th>
+	              <th class="number">Counter Status</th>
+	              <th></th>
+	            </tr>
+	          </thead>
+	          <tbody data-bind="foreach: counterQeues().rows">
+	            <tr>
+	              <td data-bind="text: counterId"></td>
+	              <td data-bind="text: counterType"></td>
+	              <td data-bind="text: counterStatus" class="text"></td>
+	             </tr>
+	          </tbody>
+	          <tfoot>
+	            <tr>
+	              <td colspan="5">Total</td>
+	              <td data-bind="text: counterQeues().total" class="number"></td>
+	              <td></td>
+	            </tr>
+	          </tfoot>
+	          <tbody></tbody>
+	        </table>
+	      </div>
+      </div>
+      <!-- Ticket Que Status -->
+      <div class="col-xs-6 col-md-6">
+      	  <h3 class="muted">Ticket Details</h3>
+	      <div id="main-content">
+	        <table class="table table-striped">
+	          <thead>
+	            <tr>
+	              <th class="number">Ticket ID</th>
+	              <th class="text">Ticket Short Description</th>
+	              <th class="number">Current Status</th>
+	              <th></th>
+	            </tr>
+	          </thead>
+	          <tbody data-bind="foreach: ticketQeues().rows">
+	            <tr>
+	              <td data-bind="text: id"></td>
+	              <td data-bind="text: details"></td>
+	              <td data-bind="text: status" class="text"></td>
+	             </tr>
+	          </tbody>
+	          <tfoot>
+	            <tr>
+	              <td colspan="5">Total</td>
+	              <td data-bind="text: ticketQeues().total" class="number"></td>
+	              <td></td>
+	            </tr>
+	          </tfoot>
+	          <tbody></tbody>
+	        </table>
+	      </div>
+      </div>
+      <div id="ticket-dialog" class="modal hide fade" tabindex="-1">
+        <div class="modal-body">
+          <form class="form-horizontal" data-bind="submit: ticket().create">
+            <fieldset>
+              <legend>
+                <span>Create a Ticket</span>
+              </legend>
+            </fieldset>
+            <div class="control-group" data-bind="css: {error: ticket().error()}">
+              <label class="control-label" for="ticketcategory">Category</label>
+              <div class="controls">
+                <label class="radio-inline">
+  					<input type="radio" name="ticketcategory" id="ticketcategory1" value="1" data-bind="checked: ticket().category"> Inquery
+				</label>
+				<label class="radio-inline">
+  					<input type="radio" name="ticketcategory" id="ticketcategory2" value="2" data-bind="checked: ticket().category"> Complain
+				</label>
+				<label class="radio-inline">
+  					<input type="radio" name="ticketcategory" id="ticketcategory3" value="3" data-bind="checked: ticket().category"> Request
+				</label>
+                <span class="help-inline" data-bind="text: ticket().error">Please choose</span>
+              </div>
+              <label class="control-label" for="ticketDescription">Description</label>
+	              <div class="controls">
+	                <input id="ticketDescription" type="text" 
+	                	data-bind="value: ticket().description">
+	                <span class="help-inline" data-bind="text: ticket().error">Please enter</span>
+	              </div>
+            </div>
+            <button class="btn" data-dismiss="modal">Close</button>
+            <button class="btn btn-primary" type="submit">
+              <span>Create</span>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- 3rd party -->
+    <script src="assets/lib/jquery/jquery.js"></script>
+    <script src="assets/lib/bootstrap/js/bootstrap.js"></script>
+    <script src="assets/lib/knockout/knockout.js"></script>
+    <script src="assets/lib/sockjs/sockjs.js"></script>
+    <script src="assets/lib/stomp/lib/stomp.min.js"></script>
+
+    <!-- application -->
+    <script src="reception.js"></script>
+    <script type="text/javascript">
+      (function() {
+        var socket = new SockJS('/counter-qeue/quecounterdashboard');
+        var stompClient = Stomp.over(socket);
+
+        var appModel = new ApplicationModel(stompClient);
+        ko.applyBindings(appModel);
+
+        appModel.connect();
+        appModel.pushNotification("Dashboard Count results take a 2-3 second simulated delay. Notifications will appear.");
+      })();
+    </script>
+
+  </body>
+</html>
